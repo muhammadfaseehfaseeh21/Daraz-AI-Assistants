@@ -352,7 +352,7 @@ Answer the question using the knowledge base.
 """
 
     response = client.chat.completions.create(
-        model=GROQ_MODEL,
+        model=GROQ_MODEL = "llama-3.3-70b-versatile"
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt}
