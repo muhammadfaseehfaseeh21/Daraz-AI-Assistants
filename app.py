@@ -32,13 +32,13 @@ st.caption("RAG-based assistant for Daraz policies and knowledge base")
 # CONFIGURATION
 # ============================================================
 
-# Google Drive folder URL
 DEFAULT_DRIVE_FOLDER = (
     "https://drive.google.com/drive/folders/"
     "1X--qt9GqHiOPn0nMKe6c0WIDQbED9DJa?usp=sharing"
 )
 
-GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+# Open-source model identifier configuration
+GROQ_MODEL = os.getenv("GROQ_MODEL", "openai/gpt-oss-120b")
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 
 CHUNK_SIZE = 800
@@ -72,27 +72,23 @@ if st.sidebar.button("🔄 Refresh Knowledge Base"):
 
 
 # ============================================================
-# GOOGLE DRIVE DOWNLOAD (FIXED GDOWN ERROR)
+# GOOGLE DRIVE DOWNLOAD
 # ============================================================
 
 @st.cache_data(show_spinner=False)
 def download_google_drive_folder(folder_url):
-
     if KNOWLEDGE_FOLDER.exists():
         shutil.rmtree(KNOWLEDGE_FOLDER)
 
     KNOWLEDGE_FOLDER.mkdir(parents=True, exist_ok=True)
 
     try:
-        # Error Fixed: 'remaining_ok' and 'use_cookies' parameters removed for gdown compatibility
         gdown.download_folder(
             url=folder_url,
             output=str(KNOWLEDGE_FOLDER),
             quiet=True
         )
-
         return True, None
-
     except Exception as e:
         return False, str(e)
 
@@ -292,7 +288,6 @@ def retrieve_documents(query, documents, index, embedding_model, k=5):
         semantic_score = float(score)
         keyword = keyword_score(query, document["text"])
 
-        # Hybrid Score
         final_score = (0.75 * semantic_score) + (0.25 * keyword)
 
         results.append({
@@ -352,7 +347,7 @@ Answer the question using the knowledge base.
 """
 
     response = client.chat.completions.create(
-        model=GROQ_MODEL = "llama-3.3-70b-versatile"
+        model=GROQ_MODEL,
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt}
@@ -437,7 +432,6 @@ if question:
 
     st.chat_message("assistant").write(answer)
 
-    # Sources Expander
     with st.expander("📚 Sources used"):
         for number, item in enumerate(retrieved, start=1):
             document = item["document"]
